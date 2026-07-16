@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "isolatedModules": true
-  },
-  "files": ["src/main.tsx"],
-  "include": ["src"],
-  "exclude": []
-}
