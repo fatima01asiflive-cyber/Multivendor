@@ -10,4 +10,6 @@ const storage=multer.diskStorage({
         cb(null, filename + '-' + uniqueSufix +".png") // Specify the filename for uploaded files
     },
 });
+
+
 exports.upload=multer({ storage: storage });
