@@ -1,29 +1,45 @@
-const express=require("express");
-const path=require("path");
-const router=express.Router();
-const user=require("../model/user");
-const{upload}=require("../multer");
+const express = require("express");
+const path = require("path");
+const router = express.Router();
+const User = require("../model/user");
+const { upload } = require("../multer");
 
-router.post("/create-user", upload.single("file"), (req, res) => {
-    const {name,email,password} =req.body;
-    const userEmail=await user.findOne({email});
+router.post("/create-user", upload.single("file"), async (req, res, next) => {
+    try {
+        const { name, email, password } = req.body;
 
-    if(userEmail){
+        // 1. Check user existence
+        const userEmail = await User.findOne({ email });
+        if (userEmail) {
+            return res.status(400).json({ message: "User already exists" });
+        }
 
-        return next(new ErrorHandler("User already exists", 400));
+        // 2. Check if file is uploaded
+        if (!req.file) {
+            return res.status(400).json({ message: "Please upload an image" });
+        }
 
+        // 3. Sirf filename lein (path.join ki zaroorat nahi hai)
+        const filename = req.file.filename;
 
+        // 4. Create new user object
+        const newUser = await User.create({
+            name,
+            email,
+            password,
+            avatar: filename, // DB mein sirf clean filename save karein
+        });
+
+        // 5. Send response
+        res.status(201).json({
+            success: true,
+            user: newUser,
+        });
+
+    } catch (error) {
+        console.error("Create User Error:", error); // Debugging ke liye log zaroori hai
+        next(error);
     }
-const filename=req.file.filename;
-const fileUrl=path.join(filename);
+});
 
-    const avatar={
-        name:name,
-        email=email,
-        password=password,
-        avatar:fileUrl,
-    };
-console.log(user);
-
-})
-
+module.exports = router;

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 import { RxAvatar } from "react-icons/rx";
+import axios from "axios";
+import { server } from "../../server";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -14,16 +16,31 @@ const Signup = () => {
     setVisible((prev) => !prev);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Email Login Submit:", { email, password, name, avatar });
-  };
+  
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
   };
 
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const config = { headers: { "Content-Type": "multipart/form-data" } };
+    const newForm = new FormData();
+    newForm.append("file", avatar);
+    newForm.append("name", name);
+    newForm.append("email", email);
+    newForm.append("password", password);
+
+    try {
+      const response = await axios.post(`${server}/user/create-user`, newForm, config);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

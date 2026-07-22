@@ -2,6 +2,7 @@ const dns = require("dns");
 dns.setServers(["1.1.1.1", "8.8.8.8"]); // Forces Node.js to use Cloudflare/Google DNS to bypass ISP blocks
 
 const path = require("path");
+
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = require("./app");
