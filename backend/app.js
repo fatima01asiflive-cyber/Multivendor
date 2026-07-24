@@ -1,30 +1,39 @@
 const express = require("express");
 const path = require("path");
-const errorMiddleware = require("./middleware/error");
-const app = express();
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const errorMiddleware = require("./middleware/error");
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-//config
+// Load .env at the VERY TOP so environment variables exist everywhere
 if (process.env.NODE_ENV !== "PRODUCTION") {
     require("dotenv").config({
         path: path.join(__dirname, ".env")
     });
 }
 
-//import routes
+const app = express();
+
+// Middlewares
+app.use(express.json());
+app.use(cookieParser());
+
+// Configured CORS for frontend integration
+app.use(
+    cors({
+        origin: ["http://localhost:5173", "http://localhost:3000"],
+        credentials: true
+    })
+);
+
+app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Import routes
 const user = require("./controller/user");
 app.use("/api/v2/user", user);
 
-//it is for error handling
+// Error Middleware (must be last)
 app.use(errorMiddleware);
 
 module.exports = app;

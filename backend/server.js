@@ -1,33 +1,44 @@
 const dns = require("dns");
-dns.setServers(["1.1.1.1", "8.8.8.8"]); // Forces Node.js to use Cloudflare/Google DNS to bypass ISP blocks
+// Force Node.js to use Cloudflare/Google DNS to bypass local ISP blocks with Atlas
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 const path = require("path");
 
+// Load .env variables before any other module imports
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = require("./app");
 const connectDatabase = require("./db/Database");
 
-//handling uncaught exceptions
+// Handling uncaught exceptions (must exit process to free bound ports)
 process.on("uncaughtException", (err) => {
-    console.log(`Error: ${err.message}`);
-    console.log("Shutting down the server due to Uncaught Exception");
+    console.error(`Uncaught Exception Error: ${err.message}`);
+    console.error("Shutting down the server due to Uncaught Exception");
+    process.exit(1);
 });
 
-//create db
-connectDatabase();
+// Create DB connection and start server
+const startServer = async () => {
+    try {
+        await connectDatabase();
 
-//create server
-const server = app.listen(process.env.PORT || 8000, () => {
-    console.log(`Server is working on http://localhost:${process.env.PORT || 8000}`);
-});
+        const PORT = process.env.PORT || 8000;
+        const server = app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}`);
+        });
 
-// underhandled promise rejection
-process.on("unhandledRejection", (err) => {
-    console.log(`Shutting down the server for ${err.message}`);
-    console.log("Shutting down the server due to Unhandled Promise Rejection");
-    server.close(() => {
+        // Unhandled promise rejections
+        process.on("unhandledRejection", (err) => {
+            console.error(`Unhandled Rejection Error: ${err.message}`);
+            console.error("Shutting down the server due to Unhandled Promise Rejection");
+            server.close(() => {
+                process.exit(1);
+            });
+        });
+    } catch (error) {
+        console.error("Failed to start server due to DB connection error:", error.message);
         process.exit(1);
-    });
-});
+    }
+};
 
+startServer();

@@ -2,8 +2,18 @@ const mongoose = require("mongoose");
 
 const connectDatabase = async () => {
     try {
-        // Prefer environment-provided URI, fallback to DB_URL, then to a local default
-        const connectionString = process.env.MONGO_URI || process.env.DB_URL || "mongodb://127.0.0.1:27017/multivendor";
+        // Resolve connection string from environment variables or fallback to local MongoDB
+        const connectionString = 
+            process.env.MONGO_URI || 
+            process.env.DB_URL || 
+            process.env.DATABASE_URL || 
+            "mongodb://127.0.0.1:27017/multivendor";
+
+        // Log target URI for quick debugging (hides password if present in standard format)
+        const maskedURI = connectionString.includes("@") 
+            ? connectionString.replace(/:([^:@]+)@/, ":****@") 
+            : connectionString;
+        console.log(`Attempting connection to: ${maskedURI}`);
 
         const data = await mongoose.connect(connectionString);
 
@@ -15,4 +25,3 @@ const connectDatabase = async () => {
 };
 
 module.exports = connectDatabase;
-
