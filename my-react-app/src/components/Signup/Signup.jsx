@@ -12,17 +12,15 @@ const Signup = () => {
   const [visible, setVisible] = useState(false);
   const [avatar, setAvatar] = useState(null);
 
+
   const handleToggleVisibility = () => {
     setVisible((prev) => !prev);
   };
-
-  
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,15 +30,17 @@ const Signup = () => {
     newForm.append("name", name);
     newForm.append("email", email);
     newForm.append("password", password);
+    axios
+      .post(`${server}/user/create-user`, newForm, config)
+      .then((res) => {
+        alert(res.data?.message || "Registration successful");
+      })
 
-    try {
-      const response = await axios.post(`${server}/user/create-user`, newForm, config);
-      console.log(response.data);
-    } catch (error) {
-      console.error("Error creating user:", error);
-    }
+      .catch((error) => {
+        console.log(error);
+      });
   };
-  
+
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -52,7 +52,6 @@ const Signup = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow-sm border border-gray-100 rounded-lg sm:px-10">
           <form className="space-y-5" onSubmit={handleSubmit}>
-       
             <div>
               <label
                 htmlFor="name"
@@ -184,9 +183,8 @@ const Signup = () => {
           <div className="mt-8 text-center text-sm text-gray-600">
             <h4>Already have an account?</h4>
             <Link to="/Login" className="text-blue-600 pl-2">
-            Login 
+              Login
             </Link>
-          
           </div>
         </div>
       </div>
