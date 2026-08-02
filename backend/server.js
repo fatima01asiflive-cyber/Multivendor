@@ -17,28 +17,30 @@ process.on("uncaughtException", (err) => {
     process.exit(1);
 });
 
-// Create DB connection and start server
-const startServer = async () => {
+// Start server immediately, then attempt DB connection with retry
+const PORT = process.env.PORT || 8000;
+const server = app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+const startDbWithRetry = async (attempt = 1) => {
     try {
         await connectDatabase();
-
-        const PORT = process.env.PORT || 8000;
-        const server = app.listen(PORT, () => {
-            console.log(`Server is running on http://localhost:${PORT}`);
-        });
-
-        // Unhandled promise rejections
-        process.on("unhandledRejection", (err) => {
-            console.error(`Unhandled Rejection Error: ${err.message}`);
-            console.error("Shutting down the server due to Unhandled Promise Rejection");
-            server.close(() => {
-                process.exit(1);
-            });
-        });
     } catch (error) {
-        console.error("Failed to start server due to DB connection error:", error.message);
-        process.exit(1);
+        console.error(`MongoDB connection attempt ${attempt} failed: ${error.message}`);
+        const retryDelay = 5000; // ms
+        console.log(`Retrying MongoDB connection in ${retryDelay / 1000}s...`);
+        setTimeout(() => startDbWithRetry(attempt + 1), retryDelay);
     }
 };
 
-startServer();
+startDbWithRetry();
+
+// Unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+    console.error(`Unhandled Rejection Error: ${err.message}`);
+    console.error("Shutting down the server due to Unhandled Promise Rejection");
+    server.close(() => {
+        process.exit(1);
+    });
+});

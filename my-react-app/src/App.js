@@ -8,7 +8,7 @@ const App = () => {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path="/activation/:url" element={<ActivationPage />} />
+                <Route path="/activation/:activation_token" element={<ActivationPage/>} />
 
             </Routes>
         </BrowserRouter>

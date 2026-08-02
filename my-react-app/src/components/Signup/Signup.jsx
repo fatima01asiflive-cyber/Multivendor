@@ -12,7 +12,6 @@ const Signup = () => {
   const [visible, setVisible] = useState(false);
   const [avatar, setAvatar] = useState(null);
 
-
   const handleToggleVisibility = () => {
     setVisible((prev) => !prev);
   };
@@ -30,6 +29,7 @@ const Signup = () => {
     newForm.append("name", name);
     newForm.append("email", email);
     newForm.append("password", password);
+
     axios
       .post(`${server}/user/create-user`, newForm, config)
       .then((res) => {

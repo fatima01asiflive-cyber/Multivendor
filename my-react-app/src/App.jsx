@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from "./pages/Loginpage.jsx";
 import SignupPage from "./pages/SignupPage.jsx"; // 1. Import your signup page!
+import ActivationPage from"./pages/ActivationPage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         {/* 2. Registered Signup route */}
         <Route path="/signup" element={<SignupPage />} />
         
+        <Route path="/activation/:activation_token" element={<ActivationPage />} />
         {/* Home route */}
         <Route path="/" element={<h1>Welcome Home</h1>} />
       </Routes>

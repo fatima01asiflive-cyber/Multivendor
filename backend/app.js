@@ -8,7 +8,7 @@ const errorMiddleware = require("./middleware/error");
 // Load .env at the VERY TOP so environment variables exist everywhere
 if (process.env.NODE_ENV !== "PRODUCTION") {
     require("dotenv").config({
-        path: path.join(__dirname, ".env")
+        path: path.join(__dirname, ".env"),
     });
 }
 
@@ -21,13 +21,18 @@ app.use(cookieParser());
 // Configured CORS for frontend integration
 app.use(
     cors({
-        origin: ["http://localhost:5173", "http://localhost:3000"],
-        credentials: true
-    })
+        origin: ["http://localhost:5173", "http://localhost:8000"],
+        credentials: true,
+    }),
 );
 
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 app.use("/backend/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Simple health check
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok", time: new Date().toISOString() });
+});
 
 // Import routes
 const user = require("./controller/user");
@@ -35,5 +40,4 @@ app.use("/api/v2/user", user);
 
 // Error Middleware (must be last)
 app.use(errorMiddleware);
-
 module.exports = app;
