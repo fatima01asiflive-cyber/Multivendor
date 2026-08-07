@@ -1,10 +1,11 @@
+
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const User = require("../model/user");
 const { upload } = require("../multer");
-const ErrorHandler = require("../utils/errorHandler");
+const ErrorHandler = require("../utils/ErrorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
@@ -131,7 +132,7 @@ router.post(
                 avatar: typeof avatar === "object" ? avatar : { public_id: Date.now().toString(), url: avatar },
             });
 
-            sendToken(createdUser, 201, res);
+            sendToken(newUser, 201, res);
         } catch (error) {
             return next(new ErrorHandler(error.message, 500));
         }

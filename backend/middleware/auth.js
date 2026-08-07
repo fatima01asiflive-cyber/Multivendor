@@ -1,3 +1,4 @@
-const ErrorHandler=require("../utils/errorHandler");
-const catchAsyncErrors=require("./catchAsyncErrors");
+// middleware/auth.js
+const ErrorHandler = require("../utils/ErrorHandler");
+const catchAsyncError = require("./catchAsyncError");
 const jwt=require("jsonwebtoken");
