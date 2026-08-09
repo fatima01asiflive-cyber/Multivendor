@@ -2,36 +2,60 @@ import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { server } from "../../server";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleToggleVisibility = () => {
     setVisible((prev) => !prev);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle standard email/password login logic here
-    console.log("Email Login Submit:", { email, password, rememberMe });
+    setLoading(true);
+
+    try {
+      // Ensure backend route path matches (e.g., /user/login-user)
+      await axios.post(
+        `${server}/user/login-user`,
+        { email, password },
+        { withCredentials: true },
+      );
+
+      toast.success("Login successful!");
+      setLoading(false);
+      navigate("/");
+      window.location.reload(); // Ensures user state is fetched afresh
+    } catch (error) {
+      setLoading(false);
+      // Handles "User Does't Exist!", "Please, Provide the correct information!", etc.
+      const errorMessage =
+        error.response?.data?.message ||
+        "Login failed! Please check your credentials.";
+      toast.error(errorMessage);
+    }
   };
 
   // Google OAuth Login Handler
   const handleGoogleLogin = () => {
     console.log("Redirecting to Google OAuth...");
-    // Example: window.location.href = "YOUR_BACKEND_URL/auth/google";
-    // Or for Firebase/Supabase: signInWithRedirect(auth, googleProvider);
+    // window.location.href = `${server}/auth/google`;
   };
 
   // GitHub OAuth Login Handler
   const handleGithubLogin = () => {
     console.log("Redirecting to GitHub OAuth...");
-    // Example: window.location.href = "YOUR_BACKEND_URL/auth/github";
-    // Or for Firebase/Supabase: signInWithRedirect(auth, githubProvider);
+    // window.location.href = `${server}/auth/github`;
   };
 
   return (
@@ -44,10 +68,13 @@ const Login = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow-sm border border-gray-100 rounded-lg sm:px-10">
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-600">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-600"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -66,7 +93,10 @@ const Login = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-600">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-600"
+              >
                 Password
               </label>
               <div className="mt-1 relative rounded-md">
@@ -85,7 +115,11 @@ const Login = () => {
                   onClick={handleToggleVisibility}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
-                  {visible ? <AiOutlineEye size={22} /> : <AiOutlineEyeInvisible size={22} />}
+                  {visible ? (
+                    <AiOutlineEye size={22} />
+                  ) : (
+                    <AiOutlineEyeInvisible size={22} />
+                  )}
                 </button>
               </div>
             </div>
@@ -101,13 +135,19 @@ const Login = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-gray-600 select-none">
+                <label
+                  htmlFor="remember-me"
+                  className="ml-2 block text-gray-600 select-none"
+                >
                   Remember me
                 </label>
               </div>
 
               <div>
-                <a href="#forgot" className="font-medium text-blue-600 hover:text-blue-500">
+                <a
+                  href="#forgot"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
                   Forgot your password?
                 </a>
               </div>
@@ -117,9 +157,10 @@ const Login = () => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#2563eb] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                disabled={loading}
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#2563eb] hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
               >
-                Submit
+                {loading ? "Logging in..." : "Submit"}
               </button>
             </div>
           </form>
@@ -131,12 +172,13 @@ const Login = () => {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="px-2 bg-white text-gray-400 tracking-wider">Or continue with</span>
+                <span className="px-2 bg-white text-gray-400 tracking-wider">
+                  Or continue with
+                </span>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              {/* Google Functional Button */}
               <button
                 type="button"
                 onClick={handleGoogleLogin}
@@ -144,8 +186,7 @@ const Login = () => {
               >
                 <FcGoogle size={20} className="mr-2" /> Google
               </button>
-              
-              {/* GitHub Functional Button */}
+
               <button
                 type="button"
                 onClick={handleGithubLogin}
@@ -158,12 +199,11 @@ const Login = () => {
 
           {/* Footer Text */}
           <div className="mt-8 text-center text-sm text-gray-600">
-           <h4>Not have any account?</h4>
-            <Link to="/Signup" className="text-blue-600 pl-2">
-                       signup
-                        </Link>
+            <h4>Not have any account?</h4>
+            <Link to="/Signup" className="text-blue-600 pl-2 font-medium">
+              signup
+            </Link>
           </div>
-
         </div>
       </div>
     </div>

@@ -1,10 +1,18 @@
+import { useEffect } from "react";
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LoginPage, SignupPage, ActivationPage } from "./Routes";
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToasty.css';
+import Store from "./redux/store";
+import { loadUser } from "./redux/actions/user";
 
 const App = () => {
+    useEffect(() => {
+        Store.dispatch(loadUser());
+
+    }, []);
+
     return (
         <BrowserRouter>
             <Routes>

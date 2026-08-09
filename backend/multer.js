@@ -12,10 +12,10 @@ const storage = multer.diskStorage({
         cb(null, uploadPath); // Store uploaded files in backend/uploads
     },
     filename: function (req, file, cb) {
-        const uniqueSufix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const extension = path.extname(file.originalname) || ".png";
         const filename = path.parse(file.originalname).name;
-        cb(null, `${filename}-${uniqueSufix}${extension}`);
+        cb(null, `${filename}-${uniqueSuffix}${extension}`);
     },
 });
 
