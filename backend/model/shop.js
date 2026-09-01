@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
-const userSchema = new mongoose.Schema({
+const withdraw = require("./withdraw");
+const shopSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please enter your name!"],
+    required: [true, "Please enter your shop name!"],
   },
   email: {
     type: String,
-    required: [true, "Please enter your email!"],
+    required: [true, "Please enter your shop email!"],
     unique: true,
     trim: true,
     lowercase: true,
@@ -23,22 +23,51 @@ const userSchema = new mongoose.Schema({
   phoneNumber: {
     type: Number,
     trim: true,
+    required: true,
   },
-
-  addresses: [
+  description: {
+    type: String,
+  },
+  address: [
     {
-      country: { type: String },
-      city: { type: String },
-      address1: { type: String },
-      address2: { type: String },
-      zipCode: { type: String },
-      addressType: { type: String },
+      type: String,
+      required: true,
     },
   ],
   role: {
     type: String,
-    default: "user",
+    default: "Seller",
   },
+  zipCode: {
+    type: Number,
+    required: true,
+  },
+  withdrawMethod: {
+    type: Object,
+  },
+  availableBalance: {
+    type: Number,
+    default: 0,
+  },
+  transactions: [
+    {
+      amount: {
+        type: Number,
+        required: true,
+      },
+      status: {
+        type: String,
+        default: "Processing",
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now(),
+      },
+      updatedAt: {
+        type: Date,
+      },
+    },
+  ],
   avatar: {
     public_id: {
       type: String,
@@ -58,7 +87,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving to database
-userSchema.pre("save", async function (next) {
+shopSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
   }
@@ -67,15 +96,15 @@ userSchema.pre("save", async function (next) {
 });
 
 // Generate JWT token for authentication
-userSchema.methods.getJwtToken = function () {
+shopSchema.methods.getJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES,
   });
 };
 
 // Compare entered password with stored hashed password
-userSchema.methods.comparePassword = async function (enteredPassword) {
+shopSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("Shop", shopSchema);
