@@ -1,0 +1,19 @@
+import AdminHeader from "../components/Layout/AdminHeader";
+import AdminSidebar from "../components/Admin/Layout/AdminSidebar";
+import AllWithdraw from "../components/Admin/AllWithdraw";
+
+const AdminDashboardWithdrawPage = () => {
+  return (
+    <div>
+      <AdminHeader />
+      <div className="w-full flex">
+        <div className="800px:w-[330px] w-20">
+          <AdminSidebar active={7} />
+        </div>
+        <AllWithdraw />
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboardWithdrawPage;
